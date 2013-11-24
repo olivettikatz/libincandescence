@@ -2,7 +2,7 @@
 #define __LIB_INCANDESCENCE_FONTLIST_H
 
 #include "../util/util.h"
-#include <fontconfig.h>
+#include <fontconfig/fontconfig.h>
 
 namespace incandescence
 {
