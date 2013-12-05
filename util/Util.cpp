@@ -4,7 +4,7 @@ namespace incandescence
 {
 	bool fileExists(string path)
 	{
-		ifstream file(path.c_str());
+		ifstream file(path.c_str(), ios::in);
 		if (file.is_open())
 		{
 			file.close();
@@ -13,6 +13,21 @@ namespace incandescence
 		else
 		{
 			return false;
+		}
+	}
+
+	string loadFile(string path)
+	{
+		ifstream file(path.c_str(), ios::in);
+		if (file.is_open())
+		{
+			string page((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+			return page;
+		}
+		else
+		{
+			INCD_ERROR("could not open file: " << path);
+			return "";
 		}
 	}
 }

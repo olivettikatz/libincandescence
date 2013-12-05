@@ -16,7 +16,8 @@
 #define INCD_MESSAGE_PREFIX_TEST INCD_MESSAGE_PREFIX<<"test: "
 #define INCD_MESSAGE_DISPLAY(msg) {INCD_MESSAGE_STREAM<<msg<<"\n";}
 
-#define INCD_ERROR(msg) {INCD_MESSAGE_DISPLAY(INCD_MESSAGE_PREFIX_ERROR<<msg);throw std::runtime_error("internal incandescence error");}
+#define INCD_FATAL(msg) {INCD_MESSAGE_DISPLAY(INCD_MESSAGE_PREFIX_ERROR<<msg);incandescence::haltGL();}
+#define INCD_ERROR(msg) {INCD_MESSAGE_DISPLAY(INCD_MESSAGE_PREFIX_ERROR<<msg);}//throw std::runtime_error("internal incandescence error");}
 #define INCD_WARNING(msg) {INCD_MESSAGE_DISPLAY(INCD_MESSAGE_PREFIX_WARNING<<msg);}
 #define INCD_DEBUG(msg) {INCD_MESSAGE_DISPLAY(INCD_MESSAGE_PREFIX_WARNING<<msg);}
 
@@ -41,6 +42,7 @@ namespace incandescence
 	using namespace std;
 
 	bool fileExists(string path);
+	string loadFile(string path);
 }
 
 #endif

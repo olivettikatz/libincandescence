@@ -8,10 +8,10 @@ int main()
 	Window w;
 	w.setSize(200, 200);
 	w.setTitle("test");
-	Window::initGlobal();
+	initGL();
 	w.init();
 	w.exec();
-	Window::haltGlobal();
+	haltGL();
 	INCD_TEST_ASSERT(true, true);
 	return 0;
 }
