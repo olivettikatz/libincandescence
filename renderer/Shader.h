@@ -15,6 +15,7 @@ namespace incandescence
 
 	public:
 		Shader(string v = "", string f = "") : vertPath(v), fragPath(f), pid(0) {}
+		Shader(GLuint p) : pid(p) {}
 		GLuint getPid();
 		bool good();
 		void useVertexScript(string v);
@@ -23,6 +24,9 @@ namespace incandescence
 		void load();
 		void unload();
 		void use();
+
+		GLint getAttribute(string s);
+		GLint getUniform(string s);
 	};
 }
 

@@ -16,11 +16,12 @@ namespace incandescence
 		Color color;
 		string text;
 		FontRenderer *font;
+		GLint uniformColor;
 
-		Text() : x(0), y(0), font(NULL) {}
-		Text(string t, int _x, int _y, FontRenderer &f) : x(_x), y(_y), text(t), font(&f) {}
-		void load(Window &w);
-		void render(Window &w);
+		Text() : x(0), y(0), font(NULL) {requireVersion(1, 4);}
+		Text(string t, int _x, int _y, FontRenderer &f) : x(_x), y(_y), text(t), font(&f) {requireVersion(1, 4);}
+		void loadHandler(Window &w);
+		void renderHandler(Window &w);
 	};
 }
 

@@ -19,14 +19,14 @@ namespace incandescence
 		}
 	}
 
-	void FontRenderer::postLoad(GLuint pid)
+	void FontRenderer::postLoad(Window &w)
 	{
 		if (INCD_GL_ERROR())
 		{
 			INCD_WARNING("errors during 'FontRenderer::load*' (before 'postLoad').");
 		}
 
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			if (!font)
 			{
@@ -53,49 +53,15 @@ namespace incandescence
 				}
 			}
 		}
-		else if (getGLVersion().first >= 3)
+		else
 		{
-			attrCoord = glGetAttribLocation(pid, symbolCoord.c_str());
-			if (attrCoord == -1)
-				INCD_ERROR("could not find GLSL attribute '" << symbolCoord << "'");
-			uniformTex = glGetUniformLocation(pid, symbolTex.c_str());
-			if (uniformTex == -1)
-				INCD_ERROR("could not find GLSL uniform '" << symbolTex << "'");
-			uniformColor = glGetUniformLocation(pid, symbolColor.c_str());
-			if (uniformColor == -1)
-				INCD_ERROR("could not find GLSL uniform '" << symbolColor << "'");
-			if (INCD_GL_ERROR())
-				INCD_WARNING("errors while retrieving GLSL attributes/uniforms (check attribute symbols used with 'FontRenderer::load*'.");
+			uniformTex = w.getShader(INCD_SHADER_TEXT).getUniform("tex");
+			attrCoord = w.getShader(INCD_SHADER_TEXT).getAttribute("coord");
 
 			glGenBuffers(1, &vbo);
 			if (INCD_GL_ERROR())
 				INCD_WARNING("errors when creating vertex buffer object.");
 		}
-	}
-
-	void FontRenderer::reportUnsupportedGLVersion(string n)
-	{
-		INCD_ERROR("unsupported OpenGL version for this font rendering type/method (" << n << "): " << getGLVersion().first << "." << getGLVersion().second);
-	}
-
-	void FontRenderer::setShaderSymbolCoord(string s)
-	{
-		symbolCoord = s;
-	}
-
-	void FontRenderer::setShaderSymbolTex(string s)
-	{
-		symbolTex = s;
-	}
-
-	void FontRenderer::setShaderSymbolColor(string s)
-	{
-		symbolColor = s;
-	}
-
-	GLint FontRenderer::getUniformColor()
-	{
-		return uniformColor;
 	}
 
 	void FontRenderer::setDPI(int d)
@@ -108,28 +74,28 @@ namespace incandescence
 		return font;
 	}
 
-	void FontRenderer::load2D(GLuint pid)
+	void FontRenderer::load2D(Window &w)
 	{
 		rastering = true;
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			font = new FTPixmapFont(path.c_str());
 		}
 		else
 		{
-			reportUnsupportedGLVersion("load2D");
+			INCD_GL_VERSION_ERROR();
 		}
-		postLoad(pid);
+		postLoad(w);
 	}
 
-	void FontRenderer::load3D(GLuint pid)
+	void FontRenderer::load3D(Window &w)
 	{
 		rastering = false;
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			font = new FTPolygonFont(path.c_str());
 		}
-		else if (getGLVersion().first >= 3)
+		else if (INCD_GL_VERSION_MAJOR >= 3)
 		{
 			if (FT_New_Face(ftlib, path.c_str(), 0, &face))
 			{
@@ -138,44 +104,44 @@ namespace incandescence
 
 			FT_Set_Pixel_Sizes(face, 0, height);
 		}
-		postLoad(pid);
+		postLoad(w);
 	}
 
-	void FontRenderer::load3DOutline(int outline, GLuint pid)
+	void FontRenderer::load3DOutline(Window &w, int outline)
 	{
 		rastering = false;
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			font = new FTOutlineFont(path.c_str());
 		}
 		else
 		{
-			reportUnsupportedGLVersion("load3DOutline");
+			INCD_GL_VERSION_ERROR();
 		}
-		postLoad(pid);
-		if (getGLVersion().first <= 2 && font)
+		postLoad(w);
+		if (INCD_GL_VERSION_MAJOR <= 2 && font)
 			font->Outset((float)outline);
 	}
 
-	void FontRenderer::load3DExtrude(int extrude, GLuint pid)
+	void FontRenderer::load3DExtrude(Window &w, int extrude)
 	{
 		rastering = false;
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			font = new FTExtrudeFont(path.c_str());
 		}
 		else
 		{
-			reportUnsupportedGLVersion("load3DExtrude");
+			INCD_GL_VERSION_ERROR();
 		}
-		postLoad(pid);
-		if (getGLVersion().first <= 2 && font)
+		postLoad(w);
+		if (INCD_GL_VERSION_MAJOR <= 2 && font)
 			font->Depth((float)extrude);
 	}
 
 	void FontRenderer::unload()
 	{
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			if (font)
 				delete font;
@@ -184,19 +150,21 @@ namespace incandescence
 
 	bool FontRenderer::good()
 	{
-		if (getGLVersion().first == 0)
-			return true;
-		else if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
+		{
 			return (font != NULL);
+		}
 		else
-			return true;
+		{
+			return (face != NULL);
+		}
 	}
 
 	void FontRenderer::render(Window &w, string text, int x, int y)
 	{
 		if (good())
 		{
-			if (getGLVersion().first <= 2)
+			if (INCD_GL_VERSION_MAJOR <= 2)
 			{
 				if (rastering)
 					glRasterPos2f(x, y);
@@ -204,7 +172,7 @@ namespace incandescence
 					glTranslatef(x, y, 0.0f);
 				font->Render(text.c_str());
 			}
-			else if (getGLVersion().first >= 3)
+			else if (INCD_GL_VERSION_MAJOR >= 3)
 			{
 				FT_GlyphSlot gs = face->glyph;
 				GLuint tex;
@@ -311,14 +279,14 @@ namespace incandescence
 
 	int FontRenderer::getWidth(string text)
 	{
-		if (getGLVersion().first <= 2)
+		if (INCD_GL_VERSION_MAJOR <= 2)
 		{
 			if (good())
 				return font->Advance(text.c_str());
 			else
 				return -1;
 		}
-		else if (getGLVersion().first >= 3)
+		else if (INCD_GL_VERSION_MAJOR >= 3)
 		{
 			return -1;
 		}

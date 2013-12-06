@@ -103,28 +103,88 @@ namespace incandescence
 		return title;
 	}
 
-	int Window::loadShader(Shader s)
+	void Window::loadDefaultShaders()
 	{
-		shaders.push_back(s);
+		loadShader(INCD_SHADER_NAME_2D, "VertexShader2D.glsl", "FragmentShader2D.glsl");
+		loadShader(INCD_SHADER_NAME_TEXT, "VertexShaderText.glsl", "FragmentShaderText.glsl");
+		loadShader(INCD_SHADER_NAME_POST_PROCESSING, "VertexShaderPostProcessing.glsl", "FragmentShaderPostProcessing.glsl");
+
+		if (hasShader(INCD_SHADER_2D) == false)
+			INCD_WARNING("running without shader (INCD_SHADER_2D).");
+		if (hasShader(INCD_SHADER_TEXT) == false)
+			INCD_WARNING("running without shader (INCD_SHADER_TEXT).");
+		if (hasShader(INCD_SHADER_POST_PROCESSING) == false)
+			INCD_WARNING("running without shader (INCD_SHADER_POST_PROCESSING).");
+		if (hasShader(INCD_SHADER_3D) == false)
+			INCD_WARNING("running without shader (INCD_SHADER_3D).");
+	}
+
+	bool Window::hasShader(int n)
+	{
+		return (n >= 0 && n < shaders.size());
+	}
+
+	bool Window::hasShader(string n)
+	{
+		return (findShader(n) >= 0);
+	}
+
+	int Window::loadShader(string n, Shader s)
+	{
+		pair<string, Shader> tmp;
+		tmp.first = n;
+		tmp.second = s;
+		shaders.push_back(tmp);
 		return (shaders.size()-1);
 	}
 
-	int Window::loadShader(string v, string f)
+	int Window::loadShader(string n, string v, string f)
 	{
 		Shader s = Shader(v, f);
 		s.load();
-		shaders.push_back(s);
-		return (shaders.size()-1);
+		return loadShader(n, s);
+	}
+
+	int Window::findShader(string n)
+	{
+		for (vector<pair<string, Shader> >::iterator i = shaders.begin(); i != shaders.end(); i++)
+		{
+			if (i->first.compare(n) == 0)
+			{
+				return distance(shaders.begin(), i);
+			}
+		}
+
+		return -1;
 	}
 
 	Shader &Window::getShader(int n)
 	{
-		return shaders[n];
+		if (n == -1)
+			return shaders[currentShader].second;
+		return shaders[n].second;
+	}
+
+	Shader &Window::getShader(string n)
+	{
+		return shaders[findShader(n)].second;
+	}
+
+	int Window::getCurrentShader()
+	{
+		return currentShader;
 	}
 
 	void Window::useShader(int n)
 	{
-		shaders[n].use();
+		currentShader = n;
+		shaders[n].second.use();
+	}
+
+	void Window::useShader(string n)
+	{
+		currentShader = findShader(n);
+		shaders[currentShader].second.use();
 	}
 
 	void Window::show()
@@ -201,6 +261,8 @@ namespace incandescence
 		if (INCD_GL_ERROR())
 			return ;
 
+		loadDefaultShaders();
+
 		loadHandler();
 	}
 
@@ -225,7 +287,7 @@ namespace incandescence
 		while (!glfwWindowShouldClose(window))
 		{
 			int tmpw, tmph;
-			glfwGetFramebufferSize(window, &tmpw, &tmph);
+			glfwGetWindowSize(window, &tmpw, &tmph);
 			if (tmpw != width || tmph != height)
 			{
 				resizeHandler(tmpw, tmph);

@@ -2,19 +2,18 @@
 
 namespace incandescence
 {
-	void Text::load(Window &w)
+	void Text::loadHandler(Window &w)
 	{
-
+		if (INCD_GL_VERSION_MAJOR >= 3)
+			uniformColor = w.getShader(INCD_SHADER_TEXT).getUniform("textColor");
 	}
 
-	void Text::render(Window &w)
+	void Text::renderHandler(Window &w)
 	{
-		color.applyToUniform(font->getUniformColor());
+		if (INCD_GL_VERSION_MAJOR <= 2)
+			color.render(w);
+		else
+			color.render(uniformColor);
 		font->render(w, text, x, y);
-		if (INCD_GL_ERROR())
-		{
-			INCD_WARNING("errors occured during Text::'*::render'.");
-			return ;
-		}
 	}
 }

@@ -1,8 +1,8 @@
 #include "../util/GLUtil.h"
+#include "../font/FontRenderer.h"
 #include "Window.h"
 #include "Poly.h"
 #include "Text.h"
-#include "../font/FontRenderer.h"
 
 using namespace incandescence;
 
@@ -13,7 +13,6 @@ class Test : public Window
 public:
 	Poly<Drawable::StrokedPoly> poly;
 	Text text;
-	int shader2D, shaderText;
 	void loadHandler();
 	void renderHandler();
 };
@@ -30,28 +29,20 @@ void Test::loadHandler()
 	text = Text("hello, world", 20, 50, font);
 	text.color = Color(255, 0, 0);
 	text.load(*this);
-
-	shader2D = loadShader("VertexShader2D.glsl", "FragmentShader2D.glsl");
-	if (getShader(shader2D).good() == false)
-		INCD_FATAL("could not load 2d shader");
-	shaderText = loadShader("VertexShaderText.glsl", "FragmentShaderText.glsl");
-	if (getShader(shaderText).good() == false)
-		INCD_FATAL("could not load text shader");
 }
 
 void Test::renderHandler()
 {
-	useShader(shader2D);
+	useShader(INCD_SHADER_2D);
 	poly.render(*this);
 
-	useShader(shaderText);
+	useShader(INCD_SHADER_TEXT);
 	text.render(*this);
 }
 
 int main()
 {
 	INCD_TEST_HEADER("Test::exec");
-	INCD_TEST_ASSERT(font.good(), true);
 	initGL(4, 1);
 	initFontRendering();
 	Test t;
@@ -60,7 +51,8 @@ int main()
 	t.setTitle("test");
 	font = FontRenderer("/System/Library/Fonts/Monaco.dfont", 48);
 	font.setDPI(getDPI());
-	font.load3D(t.getShader(1).getPid());
+	font.load3D(t);
+	INCD_TEST_ASSERT(font.good(), true);
 	t.exec();
 	INCD_TEST_ASSERT(true, true);
 }

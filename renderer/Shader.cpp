@@ -9,16 +9,7 @@ namespace incandescence
 
 	bool Shader::good()
 	{
-		if (vertPath.empty())
-			return false;
-
-		if (fragPath.empty())
-			return false;
-
-		if (pid == 0)
-			return false;
-
-		return true;
+		return (pid != 0);
 	}
 
 	void Shader::useVertexScript(string v)
@@ -58,5 +49,27 @@ namespace incandescence
 		glUseProgram(pid);
 		if (INCD_GL_ERROR())
 			return ;
+	}
+
+	GLint Shader::getAttribute(string s)
+	{
+		GLint tmp = glGetAttribLocation(pid, s.c_str());
+		if (tmp == -1)
+		{
+			INCD_FATAL("could not find GLSL attribute '" << s << "'");
+			return -1;
+		}
+		return tmp;
+	}
+
+	GLint Shader::getUniform(string s)
+	{
+		GLint tmp = glGetUniformLocation(pid, s.c_str());
+		if (tmp == -1)
+		{
+			INCD_FATAL("could not find GLSL uniform '" << s << "'");
+			return -1;
+		}
+		return tmp;
 	}
 }

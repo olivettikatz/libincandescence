@@ -4,7 +4,7 @@
 #include "../util/Util.h"
 #include "../util/GLUtil.h"
 
-#define INCD_DRAWING_UNSUPPORTED_GL_ERROR(n) reportUnsupportedGLVersion(n, __FILE__, __LINE__)
+#define INCD_REPORT_UNSUPPORTED_GL_VERSION() reportUnsupportedGLVersion(__FILE__,__LINE__)
 
 namespace incandescence
 {
@@ -15,7 +15,9 @@ namespace incandescence
 	class Drawable
 	{
 	protected:
-		void reportUnsupportedGLVersion(string n = "unknown Drawable::exec", string file = "", int linenum = -1);
+		int minVersion, maxVersion;
+		void requireVersion(int min, int max);
+		void reportUnsupportedGLVersion(string file, int linenum);
 
 	public:
 		typedef enum
@@ -32,8 +34,15 @@ namespace incandescence
 			FilledPoly = GL_POLYGON
 		} DrawingMode;
 
-		virtual void load(Window &w);
-		virtual void render(Window &w);
+		Drawable() : minVersion(-1), maxVersion(-1) {}
+
+		virtual bool good();
+		void load(Window &w);
+		virtual void loadHandler(Window &w);
+		void render(Window &w);
+		virtual void renderHandler(Window &w);
+		void render(GLint so);
+		virtual void renderHandler(GLint so);
 	};
 }
 

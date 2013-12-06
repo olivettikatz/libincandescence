@@ -12,12 +12,11 @@ namespace incandescence
 	public:
 		unsigned char r, g, b, a;
 
-		Color() : r(0), g(0), b(0), a(255) {}
-		Color(unsigned char _r, unsigned char _g, unsigned char _b) : r(_r), g(_g), b(_b), a(255) {}
-		Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a) : r(_r), g(_g), b(_b), a(_a) {}
-		void load(Window &w);
-		void render(Window &w);
-		void applyToUniform(GLint uniform);
+		Color() : r(0), g(0), b(0), a(255) {requireVersion(1, 4);}
+		Color(unsigned char _r, unsigned char _g, unsigned char _b) : r(_r), g(_g), b(_b), a(255) {requireVersion(1, 4);}
+		Color(unsigned char _r, unsigned char _g, unsigned char _b, unsigned char _a) : r(_r), g(_g), b(_b), a(_a) {requireVersion(1, 4);}
+		void renderHandler(Window &w);
+		void renderHandler(GLint so);
 	};
 }
 

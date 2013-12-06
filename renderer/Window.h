@@ -11,6 +11,16 @@
 #define INCD_WINDOW_DEFAULT_HEIGHT 200
 #define INCD_WINDOW_DEFAULT_TITLE "LibIncandescence 0.01-ALPHA"
 
+#define INCD_SHADER_NAME_2D "Poly2D"
+#define INCD_SHADER_NAME_3D "Poly3D"
+#define INCD_SHADER_NAME_TEXT "Text"
+#define INCD_SHADER_NAME_POST_PROCESSING "PostProcessing"
+
+#define INCD_SHADER_2D 0
+#define INCD_SHADER_3D 3
+#define INCD_SHADER_TEXT 1
+#define INCD_SHADER_POST_PROCESSING 2
+
 namespace incandescence
 {
 	using namespace std;
@@ -28,13 +38,14 @@ namespace incandescence
 	{
 	protected:
 		GLFWwindow *window;
-		vector<Shader> shaders;
+		vector<pair<string, Shader> > shaders;
+		int currentShader;
 
 		int width, height;
 		string title;
 
 	public:
-		Window() : window(NULL), width(INCD_WINDOW_DEFAULT_WIDTH), height(INCD_WINDOW_DEFAULT_HEIGHT), title(INCD_WINDOW_DEFAULT_TITLE) {}
+		Window() : window(NULL), currentShader(-1), width(INCD_WINDOW_DEFAULT_WIDTH), height(INCD_WINDOW_DEFAULT_HEIGHT), title(INCD_WINDOW_DEFAULT_TITLE) {}
 		
 		void setSize(int w, int h);
 		int getWidth();
@@ -56,10 +67,17 @@ namespace incandescence
 		void exec();
 
 		void setPosition(int x, int y);
-		int loadShader(Shader s);
-		int loadShader(string v, string f);
-		Shader &getShader(int n);
+		void loadDefaultShaders();
+		bool hasShader(int n);
+		bool hasShader(string n);
+		int loadShader(string n, Shader s);
+		int loadShader(string n, string v, string f);
+		int findShader(string n);
+		Shader &getShader(int n = -1);
+		Shader &getShader(string n);
+		int getCurrentShader();
 		void useShader(int n);
+		void useShader(string n);
 
 		virtual void keyHandler(Key &k, ModifierStatus &m, bool pressed);
 		virtual void buttonHandler(int b, ModifierStatus &m, bool pressed);

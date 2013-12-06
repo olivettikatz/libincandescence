@@ -5,12 +5,13 @@ namespace incandescence
 	int glMajorVersion = 0, glMinorVersion = 0;
 	bool hasGlewBeenInitialized = false;
 	bool hasContextBeenBound = false;
+	bool hasFramebufferBeenCreated = false;
 
 	void initGL(int maj, int min)
 	{
 		if (!glfwInit())
 		{
-			INCD_ERROR("could not initialize OpenGL (GLFW).");
+			INCD_FATAL("could not initialize OpenGL (GLFW).");
 		}
 
 		if (maj != -1 && min != -1)
@@ -39,7 +40,7 @@ namespace incandescence
 			GLenum e = glewInit();
 			if (e != GLEW_OK)
 			{
-				INCD_ERROR("error while initializing GLEW: " << glewGetErrorString(e));
+				INCD_FATAL("error while initializing GLEW: " << glewGetErrorString(e));
 				return ;
 			}
 			if (INCD_GL_ERROR())
@@ -67,16 +68,6 @@ namespace incandescence
 		return (int)(mode->width / (w / 25.4));
 	}
 
-	pair<int, int> getGLVersion()
-	{
-		pair<int, int> tmp;
-		tmp.first = glMajorVersion;
-		tmp.second = glMinorVersion;
-		if (INCD_GL_ERROR())
-			return tmp;
-		return tmp;
-	}
-
 	bool getGLError(string file, int linenum)
 	{
 		if (hasContextBeenBound == false)
@@ -85,7 +76,6 @@ namespace incandescence
 		GLenum e = glGetError();
 		if (e == GL_NO_ERROR)
 		{
-			//INCD_DEBUG("no error last at " << file << ":" << linenum);
 			return false;
 		}
 		else if (e == GL_INVALID_ENUM)
@@ -100,10 +90,6 @@ namespace incandescence
 		{
 			INCD_ERROR("OpenGL error (GL_INVALID_OPERATION): specified operation is not allowed in current state (" << file << ":" << linenum << ").");
 		}
-		/*else if (e == GL_INVALID_FRAMEBUFFER_OPERATION)
-		{
-			INCD_ERROR("OpenGL error (GL_INVALID_FRAMEBUFFER_OPERATION): framebuffer object incomplete (" << file << ":" << linenum << ").");
-		}*/
 		else if (e == GL_OUT_OF_MEMORY)
 		{
 			INCD_ERROR("OpenGL error (GL_OUT_OF_MEMORY): not enough memory to execute command (" << file << ":" << linenum << ").");
@@ -119,6 +105,56 @@ namespace incandescence
 		else
 		{
 			INCD_ERROR("OpenGL error (?): unknown error code (" << file << ":" << linenum << ").");
+		}
+
+		return true;
+	}
+
+	bool getGLFramebufferError(string file, int linenum)
+	{
+		if (hasContextBeenBound == false || hasFramebufferBeenCreated == false)
+			return false;
+
+		GLuint s = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (s == GL_FRAMEBUFFER_COMPLETE)
+		{
+			return false;
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT): unable to bind attachment for framebuffer object (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT): mismatched dimensions of buffers and framebuffer (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT): mismatched or unsupported formats of buffers and framebuffer (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER): incomplete or undefined draw buffer (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER): incomplete or undefined read buffer (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE): mismatched number of multisample samples (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS): mismatched layered and unlayered attachments (" << file << ":" << linenum << ").");
+		}
+		else if (s == GL_FRAMEBUFFER_UNSUPPORTED)
+		{
+			INCD_ERROR("OpenGL framebuffer error (GL_FRAMEBUFFER_UNSUPPORTED): unknown error while creating frame buffer (" << file << ":" << linenum << ").");
+		}
+		else
+		{
+			INCD_ERROR("OpenGL framebuffer error (?): unknown error while creating frame buffer (" << file << ":" << linenum << ").");
 		}
 
 		return true;
@@ -165,7 +201,10 @@ namespace incandescence
 	    std::vector<char> VertexShaderErrorMessage(InfoLogLength);
 	    glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
 	    if (InfoLogLength > 0)
+	    {
 	    	cout << &VertexShaderErrorMessage[0] << "\n";
+	    	INCD_FATAL("error(s) while compiling vertex shader (" << vertexShaderPath << ").");
+	    }
 	 
 	    char const * FragmentSourcePointer = FragmentShaderCode.c_str();
 	    glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer , NULL);
@@ -176,7 +215,10 @@ namespace incandescence
 	    std::vector<char> FragmentShaderErrorMessage(InfoLogLength);
 	    glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
 	    if (InfoLogLength > 0)
+	    {
 	    	cout << &FragmentShaderErrorMessage[0] << "\n";
+	    	INCD_FATAL("error(s) while compiling fragment shader (" << fragmentShaderPath << ").");
+	    }
 	 
 	    GLuint ProgramID = glCreateProgram();
 	    glAttachShader(ProgramID, VertexShaderID);
@@ -188,7 +230,10 @@ namespace incandescence
 	    std::vector<char> ProgramErrorMessage( max(InfoLogLength, int(1)) );
 	    glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
 	    if (InfoLogLength > 0)
+	    {
 	    	cout << &ProgramErrorMessage[0] << "\n";
+	    	INCD_FATAL("error(s) while linking shader program (" << vertexShaderPath << " with " << fragmentShaderPath << ").");
+	    }
 	 
 	    glDeleteShader(VertexShaderID);
 	    glDeleteShader(FragmentShaderID);

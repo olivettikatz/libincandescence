@@ -28,26 +28,20 @@ namespace incandescence
 		FT_Face face;
 		bool rastering;
 
-		string symbolCoord, symbolTex, symbolColor;
-		GLint attrCoord, uniformTex, uniformColor;
+		GLint uniformTex, attrCoord;
 		GLuint vbo;
 
-		void postLoad(GLuint pid = 0);
-		void reportUnsupportedGLVersion(string n = "unknown FontRenderer::...");
+		void postLoad(Window &w);
 
 	public:
-		FontRenderer() : dpi(72), width(5), height(12), font(NULL), rastering(true), symbolCoord("coord"), symbolTex("tex"), symbolColor("textColor"), attrCoord(-1), uniformTex(-1), uniformColor(-1), vbo(0) {}
-		FontRenderer(string p, int h, int w = -1) : path(p), dpi(72), width(w), height(h), font(NULL), rastering(true), symbolCoord("coord"), symbolTex("tex"), symbolColor("textColor"), attrCoord(-1), uniformTex(-1), uniformColor(-1), vbo(0) {if (width == -1) width = height/2;}
-		void setShaderSymbolCoord(string s);
-		void setShaderSymbolTex(string s);
-		void setShaderSymbolColor(string s);
-		GLint getUniformColor();
+		FontRenderer() : dpi(72), width(5), height(12), font(NULL), rastering(true), vbo(0) {}
+		FontRenderer(string p, int h, int w = -1) : path(p), dpi(72), width(w), height(h), font(NULL), rastering(true), vbo(0) {if (width == -1) width = height/2;}
 		void setDPI(int d);
 		FTFont *getFont();
-		void load2D(GLuint pid = 0);
-		void load3D(GLuint pid = 0);
-		void load3DOutline(int outline = -1, GLuint pid = 0);
-		void load3DExtrude(int extrude = -1, GLuint pid = 0);
+		void load2D(Window &w);
+		void load3D(Window &w);
+		void load3DOutline(Window &w, int outline = -1);
+		void load3DExtrude(Window &w, int extrude = -1);
 		void unload();
 		bool good();
 		void render(Window &w, string text, int x, int y);
