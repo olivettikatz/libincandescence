@@ -102,7 +102,12 @@ namespace incandescence
 	void _windowMouseScrollHandler(GLFWwindow *window, double dx, double dy);
 
 	/*! \brief Base class for a LibIncandescence window.
-	 *  Contains ability to manage window, organize shaders to use in window, and instantiatable virtual methods for implementing LibIncandescence windows. */
+	 *  Contains ability to manage window, organize shaders to use in window, and instantiatable virtual methods for implementing LibIncandescence windows. 
+	 *  For example:
+	 *  \include TestWindow.cpp 
+	 *  And a more full implementation of a Window class with Drawables:
+	 *  \include TestDrawable.cpp
+	 *  */
 	class Window
 	{
 	protected:

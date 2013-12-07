@@ -16,13 +16,20 @@
  * along with LibIncandescence.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file Util.h
- *  Includes all util headers. */
+/*! \file Renderer.h
+ *  Includes all renderer headers. */
 
-#ifndef __LIB_INCANDESCENCE_UTIL_H
-#define __LIB_INCANDESCENCE_UTIL_H
+#ifndef __LIB_INCANDESCENCE_RENDERER_H
+#define __LIB_INCANDESCENCE_RENDERER_H
 
-#include "util/Util.h"
-#include "util/GLUtil.h"
+#include "renderer/Drawable.h"
+#include "renderer/Color.h"
+#include "renderer/Poly.h"
+#include "renderer/Text.h"
+#include "renderer/Framebuffer.h"
+#include "renderer/Key.h"
+#include "renderer/ModifierStatus.h"
+#include "renderer/Shader.h"
+#include "renderer/Window.h"
 
 #endif
