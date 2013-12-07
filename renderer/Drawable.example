@@ -1,0 +1,27 @@
+class MyDrawable : public Drawable
+{
+protected:
+	int coordX, coordY;
+
+public:
+	MyDrawable(int x, int y) : coordX(x), coordY(y) {requireVersion(1, 4);} // you'll notice
+	// requireVersion(1, 4) here. This must be called in every Drawable subclass somewhere before
+	// Drawable::load is called. The first argument is the minimum version supported by the subclass,
+	// while the second is the maximum. 
+	void loadHandler(Window &w);
+	void renderHandler(Window &w);
+};
+
+void MyDrawable::loadHandler(Window &w)
+{
+	// if you were actually writing a Drawable subclass, this would be full of OpenGL calls
+
+	cout << "LOADING A VERY IMPORTANT THINGY AT " << coordX << "x" << coordY << "\n";
+}
+
+void MyDrawable::renderHandler(Window &w)
+{
+	// if you were actually writing a Drawable subclass, this would be full of OpenGL calls
+
+	cout << "RENDERING THE THINGY\n";
+}

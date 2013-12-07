@@ -1,3 +1,24 @@
+/* Copyright 2013 Oliver Katz
+ *
+ * This file is part of LibIncandescence.
+ *
+ * LibIncandescence is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * LibIncandescene is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with LibIncandescence.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*! \file Poly.h
+ *  \brief Subclass of Drawable for drawing polygons. */
+
 #ifndef __LIB_INCANDESCENCE_POLY_H
 #define __LIB_INCANDESCENCE_POLY_H
 
@@ -5,22 +26,42 @@
 #include "Color.h"
 #include "Window.h"
 
+/*! Namespace for all LibIncandescence classes/methods/global variables. */
 namespace incandescence
 {
 	using namespace std;
 
+	/*! \brief Subclass of Drawable for drawing polygons.
+	 *  Takes template argument of polygon drawing mode (see Drawable.h). */
 	template<Drawable::DrawingMode M> class Poly : public Drawable
 	{
 	public:
+		/*! Color to draw in. */
 		Color color;
+
+		/*! Vertex buffer data (where polygon data is stored for OpenGL). */
 		vector<GLfloat> vbd;
+
+		/*! Vertex Array Object, Vertex Buffer Object, and Buffer Object. */
 		GLuint vao, vbo, cbo;
 
+		/*! Constructor. */
 		Poly<M>() {requireVersion(1, 4);}
+
+		/*! Append pixel coordinate. 
+		 *  \warning OpenGL 1-2 only. */
 		Poly<M> &operator << (int v);
+
+		/*! Append OpenGL coordinate. */
 		Poly<M> &operator << (GLfloat v);
+
+		/*! Append pixel coordinate vertex. */
 		void vertex(int x, int y);
+
+		/*! Load polygon data. */
 		void loadHandler(Window &w);
+
+		/*! Renders polygon. */
 		void renderHandler(Window &w);
 	};
 
